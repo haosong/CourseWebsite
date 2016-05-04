@@ -5,44 +5,57 @@ angular.module('adWebHW')
         $scope.tab = 1;
         $scope.filtText = '';
         $scope.showDetails = false;
-        $scope.showMenu = true;
+        $scope.showBook = true;
         $scope.message = "Loading ...";
         $scope.books = bookFactory.getBooks().query();
         $scope.select = function (setTab) {
             $scope.tab = setTab;
             if (setTab === 2)
-                $scope.filtText = "appetizer";
+                $scope.filtText = "xml";
             else if (setTab === 3)
-                $scope.filtText = "mains";
+                $scope.filtText = "javaee";
             else if (setTab === 4)
-                $scope.filtText = "dessert";
+                $scope.filtText = "web3d";
             else if (setTab == 5)
                 $scope.filtText = "hybrid";
             else
                 $scope.filtText = "";
-        }
+        };
         $scope.isSelected = function (checkTab) {
             return ($scope.tab === checkTab);
-        }
+        };
         $scope.toggleDetails = function () {
             $scope.showDetails = !$scope.showDetails;
         };
     }])
 
     .controller('BookDetailController', ['$scope', '$stateParams', 'bookFactory', function($scope, $stateParams, bookFactory) {
-        // var book = bookFactory.getBook(parseInt($stateParams.id,10));
-        // $scope.book = book;
-        $scope.message="Loading ...";
-        $scope.book = bookFactory.getBooks().get({id:parseInt($stateParams.id,10)});
+        $scope.showBook = false;
+        $scope.message = "Loading ...";
+        $scope.book = bookFactory.getBooks().get({
+                id: parseInt($stateParams.id, 10)
+            })
+            .$promise.then(
+                function (response) {
+                    $scope.book = response;
+                    $scope.showBook = true;
+                },
+                function (response) {
+                    $scope.message = "Error: " + response.status + " " + response.statusText;
+                }
+            );
     }])
 
-    .controller('BookCommentController', ['$scope', function ($scope) {
+    .controller('BookCommentController', ['$scope', 'bookFactory', function ($scope, bookFactory) {
         $scope.mycomment = {rating: 5, comment: "", author: "", date: ""};
         $scope.submitComment = function () {
             $scope.mycomment.date = new Date().toISOString();
-            $scope.book.comments.push($scope.mycomment.comment);
-            //Step 4: reset your form to pristine
-            //Step 5: reset your JavaScript object that holds your comment
+            $scope.mycomment.rating = parseInt($scope.mycomment.rating, 10)
+            console.log($scope.mycomment);
+            $scope.book.comments.push($scope.mycomment);
+            bookFactory.getBooks().update({id: $scope.book.id}, $scope.book);
+            $scope.commentForm.$setPristine();
+            $scope.mycomment = {rating: 5, comment: "", author: "", date: ""};
         }
     }])
 
@@ -53,35 +66,22 @@ angular.module('adWebHW')
         $scope.invalidChannelSelection = false;
     }])
 
-    .controller('FeedbackController', ['$scope', function ($scope) {
+    .controller('FeedbackController', ['$scope', 'feedbackFactory', function ($scope, feedbackFactory) {
         $scope.sendFeedback = function () {
-            console.log($scope.feedback);
             if ($scope.feedback.agree && ($scope.feedback.mychannel == "") && !$scope.feedback.mychannel) {
                 $scope.invalidChannelSelection = true;
                 console.log('incorrect');
             }
             else {
-                $scope.invalidChannelSelection = false;
-                $scope.feedback = {
-                    mychannel: "", firstName: "", lastName: "",
-                    agree: false, email: ""
-                };
-                $scope.feedback.mychannel = "";
-
-                $scope.feedbackForm.$setPristine();
                 console.log($scope.feedback);
+                feedbackFactory.getFeedbacks().update($scope.feedback);
+                //$http.post('http://localhost:3000/feedback',$scope.feedback);
+                $scope.invalidChannelSelection = false;
+                $scope.feedback = {mychannel: "", firstName: "", lastName: "", agree: false, email: ""};
+                $scope.feedback.mychannel = "";
+                $scope.feedbackForm.$setPristine();
             }
         };
     }])
 
-    .controller('IndexController', ['$scope', function ($scope) {
-
-    }])
-
-    .controller('AboutController', ['$scope', function ($scope) {
-        $scope.feedback = {mychannel: "", firstName: "", lastName: "", agree: false, email: ""};
-        var channels = [{value: "tel", label: "Tel."}, {value: "Email", label: "Email"}];
-        $scope.channels = channels;
-        $scope.invalidChannelSelection = false;
-    }])
 ;

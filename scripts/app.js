@@ -11,8 +11,7 @@ var app = angular.module('adWebHW', ['ui.router', 'ngResource'])
                         templateUrl: 'views/header.html'
                     },
                     'content': {
-                        templateUrl: 'views/home.html',
-                        controller: 'IndexController'
+                        templateUrl: 'views/home.html'
                     },
                     'footer': {
                         templateUrl: 'views/footer.html'
@@ -24,8 +23,7 @@ var app = angular.module('adWebHW', ['ui.router', 'ngResource'])
                 url: 'about',
                 views: {
                     'content@': {
-                        templateUrl: 'views/about.html',
-                        controller: 'AboutController'
+                        templateUrl: 'views/about.html'
                     }
                 }
             })
@@ -39,7 +37,6 @@ var app = angular.module('adWebHW', ['ui.router', 'ngResource'])
                     }
                 }
             })
-
             // route for the book page
             .state('app.book', {
                 url: 'book',
@@ -50,7 +47,6 @@ var app = angular.module('adWebHW', ['ui.router', 'ngResource'])
                     }
                 }
             })
-
             // route for the bookdetail page
             .state('app.bookdetails', {
                 url: 'book/:id',

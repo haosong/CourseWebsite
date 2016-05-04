@@ -5,29 +5,32 @@ angular.module('adWebHW')
         $scope.tab = 1;
         $scope.filtText = '';
         $scope.showDetails = false;
+        $scope.showBook = true;
+        $scope.message = "Loading ...";
         $scope.books = bookFactory.getBooks();
         $scope.select = function (setTab) {
             $scope.tab = setTab;
             if (setTab === 2)
-                $scope.filtText = "appetizer";
+                $scope.filtText = "xml";
             else if (setTab === 3)
-                $scope.filtText = "mains";
+                $scope.filtText = "javaee";
             else if (setTab === 4)
-                $scope.filtText = "dessert";
+                $scope.filtText = "web3d";
             else if (setTab == 5)
                 $scope.filtText = "hybrid";
             else
                 $scope.filtText = "";
-        }
+        };
         $scope.isSelected = function (checkTab) {
             return ($scope.tab === checkTab);
-        }
+        };
         $scope.toggleDetails = function () {
             $scope.showDetails = !$scope.showDetails;
         };
     }])
 
     .controller('BookDetailController', ['$scope', '$stateParams', 'bookFactory', function($scope, $stateParams, bookFactory) {
+        $scope.showBook = true;
         var book = bookFactory.getBook(parseInt($stateParams.id,10));
         $scope.book = book;
     }])
