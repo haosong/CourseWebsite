@@ -1,3 +1,5 @@
+# Document of Ad Web Homework 1
+
 - [Document of Ad Web Homework 1](#document-of-ad-web-homework-1)
   - [Abstract](#abstract)
   - [1. Demo的下载和部署](#1-demo%E7%9A%84%E4%B8%8B%E8%BD%BD%E5%92%8C%E9%83%A8%E7%BD%B2)
@@ -23,9 +25,6 @@
   - [3. Node.js](#3-nodejs)
     - [3.1 Express.js](#31-expressjs)
     - [3.2 RESTful API](#32-restful-api)
-
-
-# Document of Ad Web Homework 1
 
 ## Abstract
 Homewwork 1利用AngularJS和Node.js技术搭建了一个简易课程主页的Single Page Application(SPA)。这份文档将介绍搭建这个网站所运用到的部分技术。
