@@ -1,153 +1,297 @@
-# Document of Ad Web Homework 1
-------
-## Abstract
-Homewwork 1利用AngularJS和Node.js技术搭建了一个简易课程主页的Single Page Application(SPA)。这份文档将介绍搭建这个网站所运用到的大部分技术。
-- Demo Link: [song-hao.github.io/AdWebHW1](http://song-hao.github.io/AdWebHW1)
-- Repo Link: [github.com/song-hao/AdWebHW1](https://github.com/song-hao/AdWebHW1)
+# angular-seed — the seed for AngularJS apps
 
-## 1. Demo的下载和部署
+This project is an application skeleton for a typical [AngularJS](http://angularjs.org/) web app.
+You can use it to quickly bootstrap your angular webapp projects and dev environment for these
+projects.
 
-### 1.1 项目下载
+The seed contains a sample AngularJS application and is preconfigured to install the Angular
+framework and a bunch of development and testing tools for instant web development gratification.
+
+The seed app doesn't do much, just shows how to wire two controllers and views together.
+
+
+## Getting Started
+
+To get you started you can simply clone the angular-seed repository and install the dependencies:
+
+### Prerequisites
+
+You need git to clone the angular-seed repository. You can get git from
+[http://git-scm.com/](http://git-scm.com/).
+
+We also use a number of node.js tools to initialize and test angular-seed. You must have node.js and
+its package manager (npm) installed.  You can get them from [http://nodejs.org/](http://nodejs.org/).
+
+### Clone angular-seed
+
+Clone the angular-seed repository using [git][git]:
+
 ```
-$ git clone https://github.com/song-hao/AdWebHW1.git
-$ npm install
-$ bower install
-```
-- 项目配置了bower.json和package.json，可以使用 npm 或 [bower](http://bower.io/) 进行包管理。但为了避免部署的麻烦(且Dependencies体积较小)，包的目录"/app/components"并未加入.gitignore内，所以可以不用进行 ``$ npm install`` 或 ``$ bower install``。
-- Repo中有两个分支 ``master`` 和 ``gh-pages``，``gh-pages``为纯静态项目，所有后台数据已存入 ``services_local.js`` 中。[Demo](http://song-hao.github.io/AdWebHW1) 即为纯静态项目，因此提交评论和意见功能无法使用。
-
-### 1.2 Node.js server部署
-项目（``master``分支）会利用 [Node.js](https://nodejs.org/en/) server对后台json数据进行读写操作。在 ``./server`` 目录下运行以下命令来开启Node.js server:
-```
-$ node server.js
+git clone https://github.com/angular/angular-seed.git
+cd angular-seed
 ```
 
-## 2. AngularJS
-### 2.1 Angular Expression
-AngularJS运用Expression技术，将数据绑定入HTML中。Expression通常有两种语法：``{{Your Expression}}`` 和 ``ng-bind="Your Expression"``。
+If you just want to start a new project without the angular-seed commit history then you can do:
 
-从Demo``./app/view``中的各个.html可以看出，其中均包含了大量的Expression操作。Expression作为AngularJS中最基本的技术，被大量的使用。
-
-下面的例子说明了Expreession是如何将quantity和cost的数据写入到HTML中的。
-```html
-<html>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-    <body>
-        <div ng-app="" ng-init="quantity=1;cost=5">
-            <p>Total in dollar: {{ quantity * cost }}</p>
-        </div>
-    </body>
-</html>
+```bash
+git clone --depth=1 https://github.com/angular/angular-seed.git <your-project-name>
 ```
-- 其中 ``ng-app`` 用来初始化一个 AngularJS 应用程序， ``ng-init`` 指令用来初始化应用程序数据。
 
-### 2.2 Angular Modules
-上述代码在HTML中直接进行了逻辑操作，这并不是很好的设计。为了分离view和logic，我们引入 ``ng-app`` 和 ``ng-controller``， 将逻辑操作移入到单独的javascript文件 ``app.js`` 和 ``controller.js`` 中：
+The `depth=1` tells git to only pull down one commit worth of historical data.
 
-- index.html
-```html
-<html>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-    <body>
-        
-        <div ng-app="myApp" ng-controller="myCtrl">
-            <p>Total in dollar: {{ quantity * cost }}</p>
-        </div>
-        
-        <script src="app.js"></script>
-        <script src="controller.js"></script>
-        
-    </body>
-</html>
+### Install Dependencies
+
+We have two kinds of dependencies in this project: tools and angular framework code.  The tools help
+us manage and test the application.
+
+* We get the tools we depend upon via `npm`, the [node package manager][npm].
+* We get the angular code via `bower`, a [client-side code package manager][bower].
+
+We have preconfigured `npm` to automatically run `bower` so we can simply do:
+
 ```
-- app.js
-```javascript
-var app = angular.module("myApp", []);
+npm install
 ```
-- controller.js
+
+Behind the scenes this will also call `bower install`.  You should find that you have two new
+folders in your project.
+
+* `node_modules` - contains the npm packages for the tools we need
+* `app/bower_components` - contains the angular framework files
+
+*Note that the `bower_components` folder would normally be installed in the root folder but
+angular-seed changes this location through the `.bowerrc` file.  Putting it in the app folder makes
+it easier to serve the files by a webserver.*
+
+### Run the Application
+
+We have preconfigured the project with a simple development web server.  The simplest way to start
+this server is:
+
 ```
-app.controller("myCtrl", function($scope) {
-    $scope.quantity = 1;
-    $scope.cost = 5;
-});
+npm start
 ```
-- AngularJS 应用程序由 ``ng-app`` 定义。应用程序在`` <div> ``内运行。
-- ``ng-controller="myCtrl"`` 属性是一个 AngularJS 指令。用于定义一个控制器。``myCtrl`` 函数是一个 JavaScript 函数。
-- AngularJS 使用``$scope`` 对象来调用控制器。在 AngularJS 中， ``$scope`` 是一个应用象(属于应用变量和函数)。控制器的 ``$scope`` （相当于作用域、控制范围）用来保存AngularJS Model(模型)的对象。控制器在作用域中创建了两个属性 (quantity 和 cost)。
 
-在本次Homework中，也采用了类似的设计。所有的逻辑处理全部交由``./app/scripts``中的javascript文件处理。目录中的 ``*_local.js`` 文件为 ``gh-pages`` 分支专用，省略了与Node.js server相关的处理。
+Now browse to the app at `http://localhost:8000/app/index.html`.
 
-### 2.3 Angular Data Binding
-结合以上的技术，我们可以实现一个简易的双向绑定例子：
-```html
-<html>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-<body>
-    
-    <div ng-app="myApp" ng-controller="myCtrl">
-        Name: <input ng-model="name">
-        <h1>You entered: {{name}}</h1>
-    </div>
 
-    <script>
-        var app = angular.module('myApp', []);
-            app.controller('myCtrl', function($scope) {
-            $scope.name = "Test Two-way Binding";
-    });
-    </script>
 
-</body>
-</html>
+## Directory Layout
+
 ```
-- 在这个例子中我们为``<input>``添加了一个``ng-model``指令。它可以绑定数据到``<input>``，``<select>``，``<textarea>``等元素的输入域中。当用户在``<input>``中输入字符串时，``name`` 变量会获取该字符串，然后在``<h1>``中显示出这个``name``变量中的字符串。因此前端输入、显示和后端变量是双向绑定的。
-
-在Homework 1中有两个地方可以直观的看到双向绑定的效果，分别是:
-
-- [Bookdetail](http://song-hao.github.io/AdWebHW1/index.html#/book/0) 页面：
-![](http://pan01.qiniudn.com/adwebhw1/1.png)
-
-- [Contact](http://song-hao.github.io/AdWebHW1/index.html#/contact) 页面：
-![](http://pan01.qiniudn.com/adwebhw1/2.png)
-
-### 2.4 Angular Directive
-AngularJS 通过被称为“指令(Directive)” 的新属性来扩展 HTML。
-AngularJS 通过内置的指令来为应用添加功能。
-AngularJS 允许你自定义指令。。除了之前在2.1、2.3中提到的 ``ng-app`` , ``ng-init`` 和 ``ng-model`` 外，AngularJS
-
-#### 2.4.1 ng-repeat
-``ng-repeat`` 被用来重复一个HTML元素。例如将其加入 ``<li>`` 标签中，在这个列表会被重复显示。其语法为``<div ng-repeat="(key, value) in myObj"> ... </div>``, Angular会遍历myObj中的所有元素并将它们全部显示，例如下面这个例子：
-```html
-<html>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script></head>
-<body>
-
-    <div ng-app="" ng-init="myObj=['id_1','id_2','id_3']">
-        <p>使用 ng-repeat 来循环数组</p>
-        <ul>
-            <li ng-repeat="id in myObj">
-                {{ id }}
-            </li>
-        </ul>
-    </div>
-    
-</body>
-</html>
+app/                    --> all of the source files for the application
+  app.css               --> default stylesheet
+  components/           --> all app specific modules
+    version/              --> version related components
+      version.js                 --> version module declaration and basic "version" value service
+      version_test.js            --> "version" value service tests
+      version-directive.js       --> custom directive that returns the current app version
+      version-directive_test.js  --> version directive tests
+      interpolate-filter.js      --> custom interpolation filter
+      interpolate-filter_test.js --> interpolate filter tests
+  view1/                --> the view1 view template and logic
+    view1.html            --> the partial template
+    view1.js              --> the controller logic
+    view1_test.js         --> tests of the controller
+  view2/                --> the view2 view template and logic
+    view2.html            --> the partial template
+    view2.js              --> the controller logic
+    view2_test.js         --> tests of the controller
+  app.js                --> main application module
+  index.html            --> app layout file (the main html template file of the app)
+  index-async.html      --> just like index.html, but loads js files asynchronously
+karma.conf.js         --> config file for running unit tests with Karma
+e2e-tests/            --> end-to-end tests
+  protractor-conf.js    --> Protractor config file
+  scenarios.js          --> end-to-end scenarios to be run by Protractor
 ```
-在Homework中
-#### 2.4.2 ng-submit
-#### 2.4.3 ng-click
-#### 2.4.4 ng-show（your first name is required）
-#### 2.4.5 ng-disabled (submmit button)
-#### 2.4.6 ng-required
-#### 2.4.7 ng-selected
-#### 2.4.8 ng-form
 
-### 2.5 Angular Filters
+## Testing
 
-## 4. Node.js
+There are two kinds of tests in the angular-seed application: Unit tests and End to End tests.
 
-### 4.1 Node.js的安装
-### 4.2 Express.js的安装
-### 4.2 RESTful API
+### Running Unit Tests
 
-## Conclution
+The angular-seed app comes preconfigured with unit tests. These are written in
+[Jasmine][jasmine], which we run with the [Karma Test Runner][karma]. We provide a Karma
+configuration file to run them.
+
+* the configuration is found at `karma.conf.js`
+* the unit tests are found next to the code they are testing and are named as `..._test.js`.
+
+The easiest way to run the unit tests is to use the supplied npm script:
+
+```
+npm test
+```
+
+This script will start the Karma test runner to execute the unit tests. Moreover, Karma will sit and
+watch the source and test files for changes and then re-run the tests whenever any of them change.
+This is the recommended strategy; if your unit tests are being run every time you save a file then
+you receive instant feedback on any changes that break the expected code functionality.
+
+You can also ask Karma to do a single run of the tests and then exit.  This is useful if you want to
+check that a particular version of the code is operating as expected.  The project contains a
+predefined script to do this:
+
+```
+npm run test-single-run
+```
+
+
+### End to end testing
+
+The angular-seed app comes with end-to-end tests, again written in [Jasmine][jasmine]. These tests
+are run with the [Protractor][protractor] End-to-End test runner.  It uses native events and has
+special features for Angular applications.
+
+* the configuration is found at `e2e-tests/protractor-conf.js`
+* the end-to-end tests are found in `e2e-tests/scenarios.js`
+
+Protractor simulates interaction with our web app and verifies that the application responds
+correctly. Therefore, our web server needs to be serving up the application, so that Protractor
+can interact with it.
+
+```
+npm start
+```
+
+In addition, since Protractor is built upon WebDriver we need to install this.  The angular-seed
+project comes with a predefined script to do this:
+
+```
+npm run update-webdriver
+```
+
+This will download and install the latest version of the stand-alone WebDriver tool.
+
+Once you have ensured that the development web server hosting our application is up and running
+and WebDriver is updated, you can run the end-to-end tests using the supplied npm script:
+
+```
+npm run protractor
+```
+
+This script will execute the end-to-end tests against the application being hosted on the
+development server.
+
+
+## Updating Angular
+
+Previously we recommended that you merge in changes to angular-seed into your own fork of the project.
+Now that the angular framework library code and tools are acquired through package managers (npm and
+bower) you can use these tools instead to update the dependencies.
+
+You can update the tool dependencies by running:
+
+```
+npm update
+```
+
+This will find the latest versions that match the version ranges specified in the `package.json` file.
+
+You can update the Angular dependencies by running:
+
+```
+bower update
+```
+
+This will find the latest versions that match the version ranges specified in the `bower.json` file.
+
+
+## Loading Angular Asynchronously
+
+The angular-seed project supports loading the framework and application scripts asynchronously.  The
+special `index-async.html` is designed to support this style of loading.  For it to work you must
+inject a piece of Angular JavaScript into the HTML page.  The project has a predefined script to help
+do this.
+
+```
+npm run update-index-async
+```
+
+This will copy the contents of the `angular-loader.js` library file into the `index-async.html` page.
+You can run this every time you update the version of Angular that you are using.
+
+
+## Serving the Application Files
+
+While angular is client-side-only technology and it's possible to create angular webapps that
+don't require a backend server at all, we recommend serving the project files using a local
+webserver during development to avoid issues with security restrictions (sandbox) in browsers. The
+sandbox implementation varies between browsers, but quite often prevents things like cookies, xhr,
+etc to function properly when an html page is opened via `file://` scheme instead of `http://`.
+
+
+### Running the App during Development
+
+The angular-seed project comes preconfigured with a local development webserver.  It is a node.js
+tool called [http-server][http-server].  You can start this webserver with `npm start` but you may choose to
+install the tool globally:
+
+```
+sudo npm install -g http-server
+```
+
+Then you can start your own development web server to serve static files from a folder by
+running:
+
+```
+http-server -a localhost -p 8000
+```
+
+Alternatively, you can choose to configure your own webserver, such as apache or nginx. Just
+configure your server to serve the files under the `app/` directory.
+
+
+### Running the App in Production
+
+This really depends on how complex your app is and the overall infrastructure of your system, but
+the general rule is that all you need in production are all the files under the `app/` directory.
+Everything else should be omitted.
+
+Angular apps are really just a bunch of static html, css and js files that just need to be hosted
+somewhere they can be accessed by browsers.
+
+If your Angular app is talking to the backend server via xhr or other means, you need to figure
+out what is the best way to host the static files to comply with the same origin policy if
+applicable. Usually this is done by hosting the files by the backend server or through
+reverse-proxying the backend server(s) and webserver(s).
+
+
+## Continuous Integration
+
+### Travis CI
+
+[Travis CI][travis] is a continuous integration service, which can monitor GitHub for new commits
+to your repository and execute scripts such as building the app or running tests. The angular-seed
+project contains a Travis configuration file, `.travis.yml`, which will cause Travis to run your
+tests when you push to GitHub.
+
+You will need to enable the integration between Travis and GitHub. See the Travis website for more
+instruction on how to do this.
+
+### CloudBees
+
+CloudBees have provided a CI/deployment setup:
+
+<a href="https://grandcentral.cloudbees.com/?CB_clickstart=https://raw.github.com/CloudBees-community/angular-js-clickstart/master/clickstart.json">
+<img src="https://d3ko533tu1ozfq.cloudfront.net/clickstart/deployInstantly.png"/></a>
+
+If you run this, you will get a cloned version of this repo to start working on in a private git repo,
+along with a CI service (in Jenkins) hosted that will run unit and end to end tests in both Firefox and Chrome.
+
+
+## Contact
+
+For more information on AngularJS please check out http://angularjs.org/
+
+[git]: http://git-scm.com/
+[bower]: http://bower.io
+[npm]: https://www.npmjs.org/
+[node]: http://nodejs.org
+[protractor]: https://github.com/angular/protractor
+[jasmine]: http://jasmine.github.io
+[karma]: http://karma-runner.github.io
+[travis]: https://travis-ci.org/
+[http-server]: https://github.com/nodeapps/http-server
