@@ -1,297 +1,491 @@
-# angular-seed — the seed for AngularJS apps
+# Document of Ad Web Homework 1
+[TOC]
+## Abstract
+Homewwork 1利用AngularJS和Node.js技术搭建了一个简易课程主页的Single Page Application(SPA)。这份文档将介绍搭建这个网站所运用到的部分技术。
+- Demo Link: [song-hao.github.io](http://song-hao.github.io/AdWebHW1)
+- Repo Link: [Github](https://github.com/song-hao/AdWebHW1)
 
-This project is an application skeleton for a typical [AngularJS](http://angularjs.org/) web app.
-You can use it to quickly bootstrap your angular webapp projects and dev environment for these
-projects.
+## 1. Demo的下载和部署
 
-The seed contains a sample AngularJS application and is preconfigured to install the Angular
-framework and a bunch of development and testing tools for instant web development gratification.
-
-The seed app doesn't do much, just shows how to wire two controllers and views together.
-
-
-## Getting Started
-
-To get you started you can simply clone the angular-seed repository and install the dependencies:
-
-### Prerequisites
-
-You need git to clone the angular-seed repository. You can get git from
-[http://git-scm.com/](http://git-scm.com/).
-
-We also use a number of node.js tools to initialize and test angular-seed. You must have node.js and
-its package manager (npm) installed.  You can get them from [http://nodejs.org/](http://nodejs.org/).
-
-### Clone angular-seed
-
-Clone the angular-seed repository using [git][git]:
-
+### 1.1 项目下载
 ```
-git clone https://github.com/angular/angular-seed.git
-cd angular-seed
+$ git clone https://github.com/song-hao/AdWebHW1.git
+$ npm install
+$ bower install
 ```
+- 项目配置了bower.json和package.json，可以使用 npm 或 [bower](http://bower.io/) 进行包管理。但为了避免部署的麻烦(且Dependencies体积较小)，包的目录"/app/components"并未加入.gitignore内，所以可以不用进行 ``$ npm install`` 或 ``$ bower install``。
+- Repo中有两个分支 ``master`` 和 ``gh-pages``，``gh-pages``为纯静态项目，所有后台数据已存入 ``services_local.js`` 中。[Demo](http://song-hao.github.io/AdWebHW1) 即为纯静态项目，因此提交评论和意见功能无法使用。
 
-If you just want to start a new project without the angular-seed commit history then you can do:
-
-```bash
-git clone --depth=1 https://github.com/angular/angular-seed.git <your-project-name>
+### 1.2 Node.js安装和部署
+项目（``master``分支）会利用 [Node.js](https://nodejs.org/en/) server对后台json数据进行读写操作。
+在[Node.js官网](https://nodejs.org/en/)下载Node.js安装包并安装。然后，在终端中输入以下命令安装Express.js等依赖文件：
+```
+npm install express --save
+npm install body-parser --save
+npm install cookie-parser --save
+npm install multer --save
+```
+安装完成后，在 ``./server`` 目录下运行以下命令来开启Node.js server:
+```
+$ node server.js
 ```
 
-The `depth=1` tells git to only pull down one commit worth of historical data.
+## 2. AngularJS
+### 2.1 Angular Expression
+AngularJS运用Expression技术，将数据绑定入HTML中。Expression通常有两种语法：``{{Your Expression}}`` 和 ``ng-bind="Your Expression"``。
 
-### Install Dependencies
+从Demo``./app/view``中的各个.html可以看出，其中均包含了大量的Expression操作。Expression作为AngularJS中最基本的技术，被大量的使用。
 
-We have two kinds of dependencies in this project: tools and angular framework code.  The tools help
-us manage and test the application.
-
-* We get the tools we depend upon via `npm`, the [node package manager][npm].
-* We get the angular code via `bower`, a [client-side code package manager][bower].
-
-We have preconfigured `npm` to automatically run `bower` so we can simply do:
-
+下面的例子说明了Expreession是如何将quantity和cost的数据写入到HTML中的。
+```html
+<html>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <body>
+        <div ng-app="" ng-init="quantity=1;cost=5">
+            <p>Total in dollar: {{ quantity * cost }}</p>
+        </div>
+    </body>
+</html>
 ```
-npm install
+Try it on [Plunker](http://plnkr.co/edit/T7DlH0i1WLyKau7lcuPB)
+
+- 其中 ``ng-app`` 用来初始化一个 AngularJS 应用程序， ``ng-init`` 指令用来初始化应用程序数据。
+
+### 2.2 Angular Modules
+上述代码在HTML中直接进行了逻辑操作，这并不是很好的设计。为了分离view和logic，我们引入 ``ng-app`` 和 ``ng-controller``， 将逻辑操作移入到单独的javascript文件 ``app.js`` 和 ``controller.js`` 中：
+
+- index.html
+```html
+<html>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <body>
+        
+        <div ng-app="myApp" ng-controller="myCtrl">
+            <p>Total in dollar: {{ quantity * cost }}</p>
+        </div>
+        
+        <script src="app.js"></script>
+        <script src="controller.js"></script>
+        
+    </body>
+</html>
 ```
-
-Behind the scenes this will also call `bower install`.  You should find that you have two new
-folders in your project.
-
-* `node_modules` - contains the npm packages for the tools we need
-* `app/bower_components` - contains the angular framework files
-
-*Note that the `bower_components` folder would normally be installed in the root folder but
-angular-seed changes this location through the `.bowerrc` file.  Putting it in the app folder makes
-it easier to serve the files by a webserver.*
-
-### Run the Application
-
-We have preconfigured the project with a simple development web server.  The simplest way to start
-this server is:
-
+- app.js
+```javascript
+var app = angular.module("myApp", []);
 ```
-npm start
+- controller.js
 ```
-
-Now browse to the app at `http://localhost:8000/app/index.html`.
-
-
-
-## Directory Layout
-
+app.controller("myCtrl", function($scope) {
+    $scope.quantity = 1;
+    $scope.cost = 5;
+});
 ```
-app/                    --> all of the source files for the application
-  app.css               --> default stylesheet
-  components/           --> all app specific modules
-    version/              --> version related components
-      version.js                 --> version module declaration and basic "version" value service
-      version_test.js            --> "version" value service tests
-      version-directive.js       --> custom directive that returns the current app version
-      version-directive_test.js  --> version directive tests
-      interpolate-filter.js      --> custom interpolation filter
-      interpolate-filter_test.js --> interpolate filter tests
-  view1/                --> the view1 view template and logic
-    view1.html            --> the partial template
-    view1.js              --> the controller logic
-    view1_test.js         --> tests of the controller
-  view2/                --> the view2 view template and logic
-    view2.html            --> the partial template
-    view2.js              --> the controller logic
-    view2_test.js         --> tests of the controller
-  app.js                --> main application module
-  index.html            --> app layout file (the main html template file of the app)
-  index-async.html      --> just like index.html, but loads js files asynchronously
-karma.conf.js         --> config file for running unit tests with Karma
-e2e-tests/            --> end-to-end tests
-  protractor-conf.js    --> Protractor config file
-  scenarios.js          --> end-to-end scenarios to be run by Protractor
+Try it on [Plunker](http://plnkr.co/edit/JUKzbZPoLYRJEYuXyXE0)
+
+- AngularJS 应用程序由 ``ng-app`` 定义。应用程序在`` <div> ``内运行。
+- ``ng-controller="myCtrl"`` 属性是一个 AngularJS 指令。用于定义一个控制器。``myCtrl`` 函数是一个 JavaScript 函数。
+- AngularJS 使用``$scope`` 对象来调用控制器。在 AngularJS 中， ``$scope`` 是一个应用象(属于应用变量和函数)。控制器的 ``$scope`` （相当于作用域、控制范围）用来保存AngularJS Model(模型)的对象。控制器在作用域中创建了两个属性 (quantity 和 cost)。
+
+在本次Homework中，也采用了类似的设计。所有的逻辑处理全部交由``./app/scripts``中的javascript文件处理。目录中的 ``*_local.js`` 文件为 ``gh-pages`` 分支专用，省略了与Node.js server相关的处理。
+
+### 2.3 Angular Data Binding
+结合以上的技术，我们可以实现一个简易的双向绑定例子：
+```html
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+    
+    <div ng-app="myApp" ng-controller="myCtrl">
+        Name: <input ng-model="name">
+        <h1>You entered: {{name}}</h1>
+    </div>
+
+    <script>
+        var app = angular.module('myApp', []);
+            app.controller('myCtrl', function($scope) {
+            $scope.name = "Test Two-way Binding";
+    });
+    </script>
+
+</body>
+</html>
 ```
+Try it on [Plunker](http://plnkr.co/edit/GhVmCUPsuVSzrXJw0p5v)
 
-## Testing
+- 在这个例子中我们为``<input>``添加了一个``ng-model``指令。它可以绑定数据到``<input>``，``<select>``，``<textarea>``等元素的输入域中。当用户在``<input>``中输入字符串时，``name`` 变量会获取该字符串，然后在``<h1>``中显示出这个``name``变量中的字符串。因此前端输入、显示和后端变量是双向绑定的。
 
-There are two kinds of tests in the angular-seed application: Unit tests and End to End tests.
+在Homework 1中有两个地方可以直观的看到双向绑定的效果，分别是:
 
-### Running Unit Tests
+- [Bookdetail](http://song-hao.github.io/AdWebHW1/index.html#/book/0) 页面：
+![](http://pan01.qiniudn.com/adwebhw1/1.png)
 
-The angular-seed app comes preconfigured with unit tests. These are written in
-[Jasmine][jasmine], which we run with the [Karma Test Runner][karma]. We provide a Karma
-configuration file to run them.
+- [Contact](http://song-hao.github.io/AdWebHW1/index.html#/contact) 页面：
+![](http://pan01.qiniudn.com/adwebhw1/2.png)
 
-* the configuration is found at `karma.conf.js`
-* the unit tests are found next to the code they are testing and are named as `..._test.js`.
+### 2.4 Angular Directive
+AngularJS 通过被称为“指令(Directive)” 的新属性来扩展 HTML。AngularJS 通过内置的指令( ``ng-`` )来为应用添加功能。
+除了之前在2.1、2.3中提到的 ``ng-app`` , ``ng-init`` 和 ``ng-model`` 外，AngularJS还提供了很多Directive，下面简单介绍一下常用的Directiv。
 
-The easiest way to run the unit tests is to use the supplied npm script:
+#### 2.4.1 ng-repeat
+``ng-repeat`` 被用来重复一个HTML元素。例如将其加入 ``<li>`` 标签中，在这个列表会被重复显示。其语法为``<div ng-repeat="(key, value) in myObj"> ... </div>``, Angular会遍历myObj中的所有元素并将它们全部显示，例如下面这个例子：
+```html
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script></head>
+<body>
 
+    <div ng-app="" ng-init="myObj=['id_1','id_2','id_3']">
+        <p>使用 ng-repeat 循环数组</p>
+        <ul>
+            <li ng-repeat="id in myObj">
+                {{ id }}
+            </li>
+        </ul>
+    </div>
+    
+</body>
+</html>
 ```
-npm test
+Try it on [Plunker](http://plnkr.co/edit/BiLVSxmqOOhLapkfyC3s)
+
+在Homework中，[Contact](http://song-hao.github.io/AdWebHW1/index.html#/contact) 和 [Bookdetail](http://song-hao.github.io/AdWebHW1/index.html#/book/0) 页面，均使用了``ng-repeat``来循环显示信息。例如在bookdetail.html中，重复显示评论：
+```html
+<ul class="media-list ">
+    <li class="media " ng-repeat="comment in book.comments | orderBy:  '-' + sortBy">
+        <div class="media-body ">
+        <blockquote>
+            <p>{{comment.rating}} Stars</p>
+            <p>{{comment.comment}}</p>
+            <footer>{{comment.author}}, <span>{{comment.date | date}}</span></footer>
+        </blockquote>
+        </div>
+        <hr style="margin: 10px">
+    </li>
+</ul>
 ```
+[Book](http://song-hao.github.io/AdWebHW1/index.html#/book) 页面：
+![](http://pan01.qiniudn.com/adwebhw1/ng_repeat.png)
 
-This script will start the Karma test runner to execute the unit tests. Moreover, Karma will sit and
-watch the source and test files for changes and then re-run the tests whenever any of them change.
-This is the recommended strategy; if your unit tests are being run every time you save a file then
-you receive instant feedback on any changes that break the expected code functionality.
-
-You can also ask Karma to do a single run of the tests and then exit.  This is useful if you want to
-check that a particular version of the code is operating as expected.  The project contains a
-predefined script to do this:
-
+#### 2.4.2 ng-submit
+``ng-submit`` 会阻止原生的submit事件，并绑定AngularJS的函数，以此增强submit操作。下面这个例子显示了如何通过 ``ng-submit`` 将表单中的数据传输至controller中，并进行记录。以此实现对所有历史表单输入的存储，然后通过双向绑定在前端展现出输入历史：
+```html
+<html>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<body ng-app="submitExample">
+  <script>
+  angular.module('submitExample', [])
+    .controller('ExampleController', ['$scope', function($scope) {
+      $scope.list = [];
+      $scope.text = 'hello';
+      $scope.submit = function() {
+        if ($scope.text) {
+          $scope.list.push(this.text);
+          $scope.text = '';
+        }
+      };
+    }]);
+  </script>
+  <form ng-submit="submit()" ng-controller="ExampleController">
+    Enter text and hit enter:
+    <input type="text" ng-model="text" name="text" />
+    <input type="submit" id="submit" value="Submit" />
+    <pre>list={{list}}</pre>
+  </form>
+</body>
+</html>
 ```
-npm run test-single-run
-```
+Try it on [Plunker](http://plnkr.co/edit/1c5xj2yepy8tqxLDCamO)
 
-
-### End to end testing
-
-The angular-seed app comes with end-to-end tests, again written in [Jasmine][jasmine]. These tests
-are run with the [Protractor][protractor] End-to-End test runner.  It uses native events and has
-special features for Angular applications.
-
-* the configuration is found at `e2e-tests/protractor-conf.js`
-* the end-to-end tests are found in `e2e-tests/scenarios.js`
-
-Protractor simulates interaction with our web app and verifies that the application responds
-correctly. Therefore, our web server needs to be serving up the application, so that Protractor
-can interact with it.
-
-```
-npm start
-```
-
-In addition, since Protractor is built upon WebDriver we need to install this.  The angular-seed
-project comes with a predefined script to do this:
-
-```
-npm run update-webdriver
-```
-
-This will download and install the latest version of the stand-alone WebDriver tool.
-
-Once you have ensured that the development web server hosting our application is up and running
-and WebDriver is updated, you can run the end-to-end tests using the supplied npm script:
-
-```
-npm run protractor
-```
-
-This script will execute the end-to-end tests against the application being hosted on the
-development server.
-
-
-## Updating Angular
-
-Previously we recommended that you merge in changes to angular-seed into your own fork of the project.
-Now that the angular framework library code and tools are acquired through package managers (npm and
-bower) you can use these tools instead to update the dependencies.
-
-You can update the tool dependencies by running:
-
-```
-npm update
-```
-
-This will find the latest versions that match the version ranges specified in the `package.json` file.
-
-You can update the Angular dependencies by running:
-
-```
-bower update
-```
-
-This will find the latest versions that match the version ranges specified in the `bower.json` file.
-
-
-## Loading Angular Asynchronously
-
-The angular-seed project supports loading the framework and application scripts asynchronously.  The
-special `index-async.html` is designed to support this style of loading.  For it to work you must
-inject a piece of Angular JavaScript into the HTML page.  The project has a predefined script to help
-do this.
-
-```
-npm run update-index-async
+在Homework中，所有的表单均通过``ng-submit``传输至Controller，并由Controller传输至Service模块，最终传输至Node.js Server。例如contact.html中feedback表单的提交：
+```html
+<form class="form-horizontal" name="feedbackForm" ng-submit="sendFeedback()" novalidate>
 ```
 
-This will copy the contents of the `angular-loader.js` library file into the `index-async.html` page.
-You can run this every time you update the version of Angular that you are using.
+#### 2.4.3 ng-click
+在传统的HTML中，我们可以通过设置onclick属性然后依靠一个javascript函数了，完成对一个点击动作的自定义。
+在AngularJS中我们可以通过 ``ng-click`` 来简化这样的操作，例如：
+```html
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<body ng-app="">
+    <button ng-click="count = count + 1" ng-init="count=0">
+        count++
+    </button>
+    <span>count: {{count}}</span>
+</body>
+</html>
+```
+Try it on [Plunker](https://plnkr.co/edit/rttxTcprLQkUx8Zl3TCq)
 
+在Homework中，book.html页面通过 ``ng-click`` 改变变量 ``SortBy`` 的值，以实现对评论的不同排序方式。
+```html
+<ul class="dropdown-menu">
+    <li><a ng-click="sortBy = 'rating'">Rating</a></li>
+    <li><a ng-click="sortBy = 'author'">Author</a></li>
+    <li><a ng-click="sortBy = 'date'">Date</a></li>
+</ul>
+```
+[Bookdetail](http://song-hao.github.io/AdWebHW1/index.html#/book/0) 页面:
+![](http://pan01.qiniudn.com/adwebhw1/4.png)
 
-## Serving the Application Files
+#### 2.4.4 ng-src
+从2.1中可以看出，AngularJS能通过Expression将数据绑定到HTML中。但是如果想将一个变量赋值给img的src属性，就会有一个Bug。src会将引号内的字符串直接解析为URL。因此我们需要通过 ``ng-src`` 来正确设置img的src。例如：
+```html
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+    <div ng-app="" ng-init="url='AngularJS-large.png'">
+        <img ng-src="https://angularjs.org/img/{{url}}">
+    </div>
+</body>
+</html>
+```
+在Homework中，所有book的img src地址均存储在后台JSON中，通过 ``ng-src`` 这种方式在HTML中显示。
 
-While angular is client-side-only technology and it's possible to create angular webapps that
-don't require a backend server at all, we recommend serving the project files using a local
-webserver during development to avoid issues with security restrictions (sandbox) in browsers. The
-sandbox implementation varies between browsers, but quite often prevents things like cookies, xhr,
-etc to function properly when an html page is opened via `file://` scheme instead of `http://`.
+#### 2.4.5 ng-if
+``ng-if`` 通过判断参数中的值，来决定是否显示一个元素。下面这个例子展示了如何运用 ``ng-if`` 来使checkbox控制两个 ``<span>`` 中内容的显示和隐藏：
+```html
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script></head>
+<body>
+    <div ng-app="">
+        <label><input type="checkbox" ng-model="checked" ng-init="checked=true" />Show: </label>
+        <span ng-if="checked">This span is visiable when the checkbox is checked.</span>
+        <span ng-if="!checked">This span is visiable when the checkbox is unchecked.</span>
+    </div>
+</body>
+</html>
+```
+Try it on [Plunker](http://plnkr.co/edit/AQ5QEMypyrvkdXzypHzC)
 
+在Homework中，``ng-if`` 被用来在server端获取数据出错时，显示错误信息。例如在bookdetail.html中：
+```
+<div class="col-xs-12" ng-if="!showBook">
+    <h3>{{errormessage}}</h3>
+</div>
+<div class="col-xs-12" ng-if="showBook">
+    ......
+</div>
+```
 
-### Running the App during Development
+#### 2.4.6 ng-show
+2.4.10的``ng-if``可以根据某一个表达式，选择两种内容来显示。如果我们只需要当表达式为true的时候，显示一个元素，那么可以用``ng-show``来处理。
 
-The angular-seed project comes preconfigured with a local development webserver.  It is a node.js
-tool called [http-server][http-server].  You can start this webserver with `npm start` but you may choose to
-install the tool globally:
+从直觉上来说，似乎所有的 ``ng-show`` 都可以用 ``ng-if`` 处理。有一个细微的区别是，``ng-show``, ``ng-hide``, 只是将元素的display设置为none。而 ``ng-if`` 会从DOM中完全移除一个元素。
+
+在Homework中，[Contact](http://song-hao.github.io/AdWebHW1/index.html#/contact) 页面Feedback表单即使用 ``ng-show`` 来提示错误信息。
+
+#### 2.4.7 More
+除了以上这些指令外，Homework还用到其他一些指令例如ng-disabled, ng-required, ng-selected等。除此以外，更多的指令可以在AngulrJS的[官方API](https://docs.angularjs.org/api/ng/directive)获取到详细的使用方法。
+
+### 2.5 Angular Filters
+除了Directive外，Angular Filter也是一个非常强大的功能。
+
+```html
+<html>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<body ng-app="myApp">
+  <script>
+  angular.module('myApp', []);
+  </script>
+  <span>1. Currency Filter: {{1234567.89 | currency}}</span><br>
+  <span>2. Date Filter: {{1462323623006 | date:'yyyy-MM-dd HH:mm:ss Z'}}</span><br>
+  <span>3. Uppercase Filter: {{'abcd' | uppercase}}</span><br>
+  <span>4. Lowercase Filter: {{'ABCD' | lowercase}}</span><br>
+  <span>5. OrderBy Filter: {{[10,13,24,8,3,78] | orderBy}}</span>
+</body>
+</html>
+```
+Try it on [Plunker](https://plnkr.co/edit/rXueW2DYfUEYw34eh8GO)
+
+在Homework中这些基本类型都被运用到。其中OrderBy可以通过变量进行排序。在 ``bookdetail.html``中我们运用这种特性来进行评论的排序。首先通过2.4.3中所说的 ``ng-click`` 来对 ``sortBy`` 变量进行赋值，赋值为rating, author, date。然后再orderBy时将这个变量传入，于是 ``ng-repeate`` 便会按照对应的顺序显示所有的评论。
+结合 ``ng-repeate``, ``ng-click`` 和 ``orderBy Filter`` 可以方便的产生这样一个评论的展示与排序。
+```html
+<ul class="media-list ">
+    <li class="media " ng-repeat="comment in book.comments | orderBy: sortBy">
+        <div class="media-body ">
+        <blockquote>
+            <p>{{comment.rating}} Stars</p>
+            <p>{{comment.comment}}</p>
+            <footer>{{comment.author}}, 
+            <span>{{comment.date | date}}</span></footer>
+        </blockquote>
+        </div>
+    </li>
+</ul>
+```
+除了AngularJS提供的Filter以外，我们还可以自定义Filter。在Homework中，自定义了一个首字母大写的 ``capitalize`` Filter:
+```javascripte
+// FILE: app.js
+app.filter('capitalize', function() {
+    return function(input, scope) {
+        if (input!=null)
+            input = input.toLowerCase();
+        return input.substring(0,1).toUpperCase()+input.substring(1);
+    }
+});
+```
+定义完成后就可以在HTML中通过标准Filter语法 ``{{someString | capitalize}}`` 直接调用了。
+
+### 2.6 Dependency Injection
+依赖注入是AngularJS中的重要概念。在Homework中，我们可以在controller.js中见到大量的依赖注入。对一个Controller来说，标准的依赖注入格式如下（可能有时可以见到更简洁的写法，AngularJS也确实支持一些简化的依赖注入写法。但那些写法会在Minify代码的时候产生一些奇怪的Bug）：
+```
+someModule.controller('MyController', ['$scope', 'dep1', 'dep2', function($scope, dep1, dep2) {
+    ...
+    $scope.aMethod = function() {
+    ...
+    }
+    ...
+}]);
+```
+- 这段代码为someModule创建了一个名叫MyController的controller，其中包含一个方法叫aMethod。这个controller依赖与dep1和dep2.
+ 
+以Homework中的一个Controller为例：
+```
+.controller('BookDetailController', ['$scope', '$stateParams', 'bookFactory', function($scope, $stateParams, bookFactory) {
+    ......
+}])
+```
+这段代码为 [Bookdetail](http://song-hao.github.io/AdWebHW1/index.html#/book/0) 页面的Controller。它注入了三个依赖分别是：controller所在元素的作用域 ``$scope``， book的id ``'$stateParams'`` 和 与后台交互获取具体数据的 ``bookFactory``。
+关于Dependency Injection这种设计的优劣，可以参考[Wikipedia](https://en.wikipedia.org/wiki/Dependency_injection)上的介绍。
+
+### 2.7 UI-Route
+UI-Route是这个SPA的骨架。制作一个拥有多页面的网站时，页面直接的链接和指向是关键的。此外对于一个常见的header,body,footer三段式设计的站点，我们往往只需要改变body的内容。UI-Route将会帮助我们实现这样的设计。
+在Homework中，路由定义在app.js的中：
+```javascript
+.config(function ($stateProvider, $urlRouterProvider) {
+        $stateProvider
+        // route for the home page
+            .state('app', {
+                url: '/',
+                views: {
+                    'header': {templateUrl: 'views/header.html'},
+                    'content': {templateUrl: 'views/home.html'},
+                    'footer': {templateUrl: 'views/footer.html'}
+                }
+            })
+            // route for the about page
+            .state('app.about', {
+                url: 'about',
+                views: {
+                    'content@': {
+                        templateUrl: 'views/about.html'
+                    }
+                }
+            })
+            // route for the contact page
+            .state('app.contact', {
+                url: 'contact',
+                views: {
+                    'content@': {
+                        templateUrl: 'views/contact.html',
+                        controller: 'ContactController'
+                    }
+                }
+            })
+            // route for the book page
+            .state('app.book', {
+                url: 'book',
+                views: {
+                    'content@': {
+                        templateUrl: 'views/book.html',
+                        controller: 'BookController'
+                    }
+                }
+            })
+            // route for the bookdetail page
+            .state('app.bookdetails', {
+                url: 'book/:id',
+                views: {
+                    'content@': {
+                        templateUrl: 'views/bookdetail.html',
+                        controller: 'BookDetailController'
+                    }
+                }
+            });
+        $urlRouterProvider.otherwise('/');
+    })
 
 ```
-sudo npm install -g http-server
+通过这样一段路由代码，我们确定了AngularJS App在各个状态下，网站的显示内容。整个app的header和footer固定为两个HTML，在不同的状态下，content内容动态改变。比如在 ``app.about`` 下，content会变成about.html.
+
+整个Homework的页面逻辑如下：
+![](http://pan01.qiniudn.com/adwebhw1/ui_route.png)
+### 2.8 Angular Service
+在使用 Angular 时，可能会很自然地就会往 controller 堆满不必要的逻辑。但一个好的设计，controller 这一层应该是很薄；也就是说，应用里大部分的业务逻辑和持久化数据都应该放在 service 里。
+
+为了更好的降低耦合，我们可以把一下功能封装为service。在Angular中已经内置了不少service，比如 ``$location``, ``$http``, ``$log``  service分别提供URL地址，XMLHttpRequest，和日志服务。
+
+在Homework中为了分离与服务器端的操作，自定义了两个service：bookFactory 和 feedbackFactory。以bookFactory为例：
+```javascript
+.service('bookFactory', ['$resource', 'baseURL', function ($resource, baseURL) {
+    this.getBooks = function () {
+        var data = $resource(
+            baseURL + "books/:id",null, {
+            'update': {
+                method: 'PUT',
+                responseType: 'json'}
+            });
+        console.log(data);
+        return data;
+    };
+}])
 ```
+这个bookFactory会注入``$resource``和URL信息，然后通过下一结将会讲到的resource的功能，与Node.js server进行数据交互。
+除了Service外，Factory和Provider，也有类似的功能，三者之间有些细微的差别，但作用是相似的。可以在Angular JS官方API查看具体语法。
 
-Then you can start your own development web server to serve static files from a folder by
-running:
+### 2.9 Angular ngResource
+在Angular中，可以通过 ``$Http`` service提供的GET,POST,PUT等方法进行数据传输的处理。更多使用方法见[官方API](https://docs.angularjs.org/api/ng/service/)。等这种底层方法的使用比较繁复。
 
+``$resource`` 是一个依赖 ``$Http`` 的服务组件，它创建了一个资源对象，让你与RESTful服务器端数据源实现交互的工厂。有了这个客户端我们可以用一种更简单的方式来发送XHR请求，返回的是资源对象。这种更高层的封装，使得我们不用去关心更底层的 ``$http`` 服务交互操作方法（HTTP方法，URL等）。
+ngResource的安装命令为：
 ```
-http-server -a localhost -p 8000
+npm install angular-resource
+bower install angular-resource
 ```
+- 由包管理方式，选择一条命令进行安装。
 
-Alternatively, you can choose to configure your own webserver, such as apache or nginx. Just
-configure your server to serve the files under the `app/` directory.
-
-
-### Running the App in Production
-
-This really depends on how complex your app is and the overall infrastructure of your system, but
-the general rule is that all you need in production are all the files under the `app/` directory.
-Everything else should be omitted.
-
-Angular apps are really just a bunch of static html, css and js files that just need to be hosted
-somewhere they can be accessed by browsers.
-
-If your Angular app is talking to the backend server via xhr or other means, you need to figure
-out what is the best way to host the static files to comply with the same origin policy if
-applicable. Usually this is done by hosting the files by the backend server or through
-reverse-proxying the backend server(s) and webserver(s).
+在Homework中，service.js中的两个service均是采用ngResource技术与Node.js server进行数据交互
 
 
-## Continuous Integration
+## 3. Node.js
+简单的说 Node.js 就是运行在服务端的 JavaScript。Node.js 是一个基于Chrome JavaScript 运行时建立的一个平台。Node.js是一个事件驱动I/O服务端JavaScript环境，基于Google的V8引擎，V8引擎执行Javascript的速度非常快，轻量又高效。
+### 3.1 Express.js
+Express 是一个简洁而灵活的 node.js Web应用框架,提供了一系列强大特性帮助你创建各种 Web 应用，和丰富的 HTTP 工具。
+Express 不对 Node.js 已有的特性进行二次抽象，只是在它之上扩展了 Web 应用所需的基本功能。
+通过以下两行代码，可以声明一个基于Express的Node.js server：
+```javascript
+var express = require('express');
+var app = express();
+```
+然后通过listen函数开启服务端口：
+```
+var server = app.listen(3000, "localhost", function () {
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log('\nNodeJS Server is running at: http://%s:%s\n\nServer Log:\n', host, port);
+});
+```
+借助Express.js，可以非常快速地完成Homework中所需的RESTful开发。
 
-### Travis CI
+### 3.2 RESTful API
+Web service是一个平台独立的，低耦合的，自包含的、基于可编程的web的应用程序，可使用开放的XML（标准通用标记语言下的一个子集）标准来描述、发布、发现、协调和配置这些应用程序，用于开发分布式的互操作的应用程序。
 
-[Travis CI][travis] is a continuous integration service, which can monitor GitHub for new commits
-to your repository and execute scripts such as building the app or running tests. The angular-seed
-project contains a Travis configuration file, `.travis.yml`, which will cause Travis to run your
-tests when you push to GitHub.
+基于 REST 架构的 Web Services 即是 RESTful。由于轻量级以及通过 HTTP 直接传输数据的特性，Web 服务的 RESTful 方法已经成为最常见的替代方法。可以使用各种语言（比如 Java 程序、Perl、Ruby、Python、PHP 和 Javascript[包括 Ajax]）实现客户端。
 
-You will need to enable the integration between Travis and GitHub. See the Travis website for more
-instruction on how to do this.
+RESTful Web 服务通常可以通过自动客户端或代表用户的应用程序访问。但是，这种服务的简便性让用户能够与之直接交互，使用它们的 Web 浏览器构建一个 GET URL 并读取返回的内容。
 
-### CloudBees
+以server.js中对book的get请求为例：
+```
+app.get('/books', function (req, res) {
+    fs.readFile(__dirname + "/" + "book.json", 'utf8', function (err, data) {
+        data = JSON.parse(data);
+        var books = data['books'];
+        res.end(JSON.stringify(books));
+    });
+});
+```
+- 这个函数处理来自前端的get操作，读取服务器端的book.json，获取其中'books'字段的所有内容，并将其返回的前端。
 
-CloudBees have provided a CI/deployment setup:
-
-<a href="https://grandcentral.cloudbees.com/?CB_clickstart=https://raw.github.com/CloudBees-community/angular-js-clickstart/master/clickstart.json">
-<img src="https://d3ko533tu1ozfq.cloudfront.net/clickstart/deployInstantly.png"/></a>
-
-If you run this, you will get a cloned version of this repo to start working on in a private git repo,
-along with a CI service (in Jenkins) hosted that will run unit and end to end tests in both Firefox and Chrome.
-
-
-## Contact
-
-For more information on AngularJS please check out http://angularjs.org/
-
-[git]: http://git-scm.com/
-[bower]: http://bower.io
-[npm]: https://www.npmjs.org/
-[node]: http://nodejs.org
-[protractor]: https://github.com/angular/protractor
-[jasmine]: http://jasmine.github.io
-[karma]: http://karma-runner.github.io
-[travis]: https://travis-ci.org/
-[http-server]: https://github.com/nodeapps/http-server
+由于这个Homework对于后端数据的读取和写入操作，都比较简单，因此整个Node.js只需要大约60行就可以完成所有的功能，也体现了Node.js和Express最基本的一些技术。
